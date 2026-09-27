@@ -4,8 +4,10 @@
     "type": "library",
     "require": {
         "php": "^8.3",
+        "brick/math": "^0.14.2 || ^0.15 || ^0.16 || ^0.17 || ^0.18 || ^0.19",
         "laravel/framework": "^12 || ^13",
-        "telegram-bot-essentials/essence": "^0.12"
+        "telegram-bot-essentials/billing": "~0.0.38",
+        "telegram-bot-essentials/essence": "^0.15"
     },
     "require-dev": {
         "larastan/larastan": "^3.0",
