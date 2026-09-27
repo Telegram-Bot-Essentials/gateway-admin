@@ -7,6 +7,8 @@ convention that a 0.x minor may carry breaking changes until the package's API s
 
 ## [Unreleased]
 
+## [0.0.1] - 2026-09-27
+
 ### Added
 
 - `👑 Pay as admin` gateway: a button on every invoice, shown only to admins, the bot
