@@ -4,6 +4,11 @@ on:
   push:
     tags: ['v*']
 
+# Required: the org default token is read-only, and the reusable workflow
+# needs contents: write to create the release.
+permissions:
+  contents: write
+
 jobs:
   release:
     uses: Telegram-Bot-Essentials/.github/.github/workflows/release.yml@main
