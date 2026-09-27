@@ -3,15 +3,13 @@
 namespace TelegramBotEssentials\GatewayAdmin;
 
 use Illuminate\Support\ServiceProvider;
+use Telegram\Bot\Keyboard\Keyboard;
+use TelegramBotEssentials\Billing\DTOs\Gateway;
+use TelegramBotEssentials\Billing\Models\Invoice;
+use TelegramBotEssentials\GatewayAdmin\Telegram\CallbackQueries\Admin\AdminPaymentQuery;
 
 class TbeGatewayAdminServiceProvider extends ServiceProvider
 {
-    public function register(): void
-    {
-        // Bind services/singletons your package needs here, e.g.:
-        // $this->app->singleton(YourService::class);
-    }
-
     public function boot(): void
     {
         $this->registerPublishing();
@@ -19,31 +17,11 @@ class TbeGatewayAdminServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'tbe-gateway-admin');
 
-        // CallbackQueries and StateAnswers register themselves here, in
-        // boot() - list every class your package ships.
-        // callbackQueryBus()->addCallbackQueries([
-        //     ExampleQuery::class,
-        // ]);
-        //
-        // stateAnswerBus()->addStateAnswers([
-        //     ExampleAnswer::class,
-        // ]);
+        callbackQueryBus()->addCallbackQueries([
+            AdminPaymentQuery::class,
+        ]);
 
-        // ReplyKeys are different: essence has no directory-scan for a
-        // companion's own ReplyKeys, only for its own built-ins and the
-        // consuming app's app/Telegram/**. A companion's ReplyKey only
-        // appears once the consuming app lists it in
-        // config('tbe-essence.keyboard') - e.g.:
-        //
-        //   'keyboard' => [
-        //       'member' => [[\TelegramBotEssentials\GatewayAdmin\Telegram\ReplyKeys\Member\ExampleKey::class]],
-        //   ],
-        //
-        // Document that in your README rather than trying to register it
-        // here - it won't take effect from this provider.
-
-        // If you listen for essence's events, do it here too, e.g.:
-        // botEventBus()->listen(BotUpdateReceived::class, YourListener::class);
+        $this->registerToBilling();
     }
 
     protected function registerPublishing(): void
@@ -53,5 +31,24 @@ class TbeGatewayAdminServiceProvider extends ServiceProvider
                 __DIR__.'/../lang' => resource_path('lang/vendor/tbe-gateway-admin'),
             ], 'tbe-gateway-admin-translations');
         }
+    }
+
+    /** A button on every invoice, seen only by admins and the bot owner, that settles it in one click. */
+    private function registerToBilling(): void
+    {
+        gateways()->addGateway(new Gateway(
+            key: 'admin',
+            label: __('tbe-gateway-admin::invoice.labels.gateway'),
+            inlineButtonGenerator: function (Invoice $invoice) {
+                if (! hasAccess()) {
+                    return null;
+                }
+
+                return Keyboard::inlineButton([
+                    'text' => __('tbe-gateway-admin::invoice.keys.pay'),
+                    'callback_data' => encodeCallback(AdminPaymentQuery::TYPE, 'pay', [$invoice->getKey()]),
+                ]);
+            }
+        ));
     }
 }
