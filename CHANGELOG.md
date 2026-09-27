@@ -9,4 +9,7 @@ convention that a 0.x minor may carry breaking changes until the package's API s
 
 ### Added
 
-- Initial package scaffold, from `telegram-bot-essentials/gateway-admin`.
+- `👑 Pay as admin` gateway: a button on every invoice, shown only to admins, the bot
+  owner and the developer, that marks the invoice paid in one click.
+- `AdminPaymentAttempt` recording which admin paid an invoice and for how much.
+- An audit log entry per admin payment.

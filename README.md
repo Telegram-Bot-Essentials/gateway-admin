@@ -1,55 +1,39 @@
-# telegram-bot-essentials/gateway-admin
+# Telegram Bot Essentials — Gateway: Admin
 
-[![tests](https://github.com/telegram-bot-essentials/gateway-admin/actions/workflows/tests.yml/badge.svg)](https://github.com/telegram-bot-essentials/gateway-admin/actions/workflows/tests.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+A one-click "pay as admin" gateway for
+[`telegram-bot-essentials/billing`](https://github.com/Telegram-Bot-Essentials/billing).
+Every invoice gets a `👑 Pay as admin` button that only admins, the bot owner and the
+developer see (essence's `hasAccess()`). Pressing it settles the invoice at once: no money
+moves, the invoice is marked paid through the normal `InvoicePaid` flow, and an
+`AdminPaymentAttempt` records which admin paid it and for how much.
 
-Template repository for a new `telegram-bot-essentials/*` companion package. Clone it via GitHub's "Use this template" (not a fork - you want fresh history), then follow **Renaming this** below. It's a real, working package as-is - `composer test` passes on a fresh clone - not a pile of `{{PLACEHOLDER}}` tokens.
+Use it to grant a service for free, compensate a member, or settle an invoice paid outside
+the bot.
 
-## What's here
-
-- `composer.json` wired for the ecosystem: essence as a dependency, the Pest/Pint/PHPStan/Testbench dev toolchain, `test`/`lint`/`format`/`analyse` scripts.
-- `src/TbeGatewayAdminServiceProvider.php` - the real registration shape: migrations, translations, `callbackQueryBus()`/`stateAnswerBus()` registration, and a comment explaining why `ReplyKey`s are *not* registered here (see below).
-- `src/Telegram/{CallbackQueries,StateAnswers,ReplyKeys,Commands,Features}/{Admin,Member}/` - the directory convention every companion package follows, so `essence`'s `tbe:make:*` generators drop files in the right place.
-- One working example, `ExampleKey`, with its own test - proof the scaffold actually runs, not a placeholder to delete blindly.
-- `tests/TestCase.php` extending essence's `Testing\TestCase` - `Http::fake()` by default, `makeBot()`/`makeBotUser()`/`postWebhookUpdate()`/`assertTelegramSent()` for free. See essence's own README for the full API.
-- GitHub Actions CI: Pest across PHP 8.3/8.4/8.5 × Laravel 12/13, plus Pint and PHPStan (level max - no baseline needed for a package that starts clean).
-
-## Renaming this
-
-Find-and-replace these, in this order (the third depends on the first two):
-
-| From | To | Where |
-|---|---|---|
-| `telegram-bot-essentials/gateway-admin` | `telegram-bot-essentials/your-package` | `composer.json`, README/CHANGELOG |
-| `TelegramBotEssentials\GatewayAdmin` | `TelegramBotEssentials\YourPackage` | every PHP file's namespace/`use` |
-| `TbeGatewayAdminServiceProvider` | `TbeYourPackageServiceProvider` | `composer.json`'s `extra.laravel.providers`, the provider's filename and class, `tests/TestCase.php` |
-| `tbe-gateway-admin` | `tbe-your-package` | the translation namespace and publish tag in the provider, `lang/` usage |
-
-Then:
-
-- Update `composer.json`'s `description` and `authors`.
-- Delete `ExampleKey.php`, its lang entries, and `ExampleKeyTest.php` once you've built your own (or keep it as a live reference while you get oriented).
-- Delete any of the empty `.gitkeep`-only directories under `src/Telegram/**` you don't end up using.
-- Run `composer test && composer lint && composer analyse` to confirm the rename didn't break anything.
-
-## Testing conventions worth knowing up front
-
-- **A companion's `ReplyKey`s are not auto-discovered.** Essence only directory-scans its own built-ins and the consuming app's `app/Telegram/**`; a companion's `ReplyKey` only reaches the bus once the consuming app lists it in `config('tbe-essence.keyboard')`. A test exercising one needs to register it explicitly first - see `ExampleKeyTest.php` for the one-line pattern (`replyKeyBus()->addReplyKey(...)`), which stands in for what the app's config would otherwise do.
-- **`CallbackQuery`s and `StateAnswer`s *are* self-registered**, in the provider's `boot()` via `callbackQueryBus()->addCallbackQueries([...])`/`stateAnswerBus()->addStateAnswers([...])` - list yours there and essence's `Testing\TestCase` picks them up automatically once your provider is registered.
-- **`postWebhookUpdate()` drives the real stack** - routing, `TelegramBotAuthentication`, the controller - not a shortcut. Outbound Telegram calls are faked automatically (`LaravelHttpClient` routes every SDK call through `Illuminate\Support\Facades\Http`, and `Http::fake()` runs in `setUp()`), so nothing ever reaches the real Telegram API.
-- **`makeBot()` defaults `activated_until` ten years out.** The `bots` migration's `useCurrent()` means a bot created without one is immediately treated as expired.
-- **Role-gated handlers need `makeBotUser()`** with an explicit `power`, pre-created at the same `peerId` you pass to `makeMessageUpdate()`/`makeCallbackQueryUpdate()` - otherwise the webhook auth flow auto-creates a fresh member-level user.
-
-## Static analysis
-
-PHPStan runs at level max with no baseline file - a new package should start clean and stay that way. `phpstan.neon.dist` does carry one narrow `ignoreErrors` entry for `wHook()->user()->telegramUser->peer_id`, an ecosystem-wide idiom (Larastan types a `belongsTo` as nullable even though it's backed by a `NOT NULL` foreign key); it goes away along with `ExampleKey.php`. If you inherit code with real pre-existing debt (e.g. porting from an older, unlinted package), generate a proper baseline the same way essence did:
+## Installation
 
 ```bash
-composer analyse -- --generate-baseline=phpstan-baseline.neon
+composer require telegram-bot-essentials/gateway-admin
+php artisan migrate
 ```
 
-then add `- phpstan-baseline.neon` to `phpstan.neon.dist`'s `includes`. New code still has to be clean.
+No config and no settings: the provider registers the gateway and its callback query.
 
-## See also
+## How it behaves
 
-- [telegram-bot-essentials/essence](https://github.com/Telegram-Bot-Essentials/essence) - the core framework this depends on, including its own README's Testing section for the full `Testing\TestCase` API.
+- The button shows on every invoice an admin views, including their own purchases, next to
+  every other gateway.
+- A double tap pays once: the invoice row is locked and an already-paid invoice answers
+  "This invoice is already paid." instead.
+- Each payment is written to the audit log (`Paid invoice #12 of 150000 as admin`).
+- A consuming app that refunds orders can tell an admin-paid invoice by its payment attempt
+  (`$invoice->paymentAttempt instanceof AdminPaymentAttempt`) and skip crediting money that
+  was never received.
+
+## Testing
+
+```bash
+composer test
+composer lint
+composer analyse
+```
