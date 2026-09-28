@@ -7,6 +7,10 @@ convention that a 0.x minor may carry breaking changes until the package's API s
 
 ## [Unreleased]
 
+### Changed
+
+- Accepts essence 0.16 alongside 0.15.
+
 ## [0.0.1] - 2026-09-27
 
 ### Added
