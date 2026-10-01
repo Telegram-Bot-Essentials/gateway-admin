@@ -7,6 +7,10 @@ convention that a 0.x minor may carry breaking changes until the package's API s
 
 ## [Unreleased]
 
+### Changed
+
+- Reworded the user-facing English and Persian strings to read more naturally; no keys or placeholders changed.
+
 ## [0.0.2] - 2026-09-28
 
 ### Changed
