@@ -7,6 +7,16 @@ convention that a 0.x minor may carry breaking changes until the package's API s
 
 ## [Unreleased]
 
+Requires essence 0.17, which replaces power levels with named permissions.
+
+### Changed
+
+- The admin screens ask for `gateway-admin.payments.manage` instead of the admin power level.
+  The names are registered with essence's permission registry, so a role
+  package can grant them separately.
+- The pay button on an invoice shows for whoever holds
+  `gateway-admin.payments.manage`, not for every admin.
+
 ## [0.0.3] - 2026-10-01
 
 ### Changed

@@ -2,8 +2,9 @@
 
 A one-click "pay as admin" gateway for
 [`telegram-bot-essentials/billing`](https://github.com/Telegram-Bot-Essentials/billing).
-Every invoice gets a `👑 Pay as admin` button that only admins, the bot owner and the
-developer see (essence's `hasAccess()`). Pressing it settles the invoice at once: no money
+Every invoice gets a `👑 Pay as admin` button that only users holding the
+`gateway-admin.payments.manage` permission see (with essence alone: the bot owner and the
+developer). Pressing it settles the invoice at once: no money
 moves, the invoice is marked paid through the normal `InvoicePaid` flow, and an
 `AdminPaymentAttempt` records which admin paid it and for how much.
 
