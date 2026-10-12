@@ -7,6 +7,8 @@ convention that a 0.x minor may carry breaking changes until the package's API s
 
 ## [Unreleased]
 
+## [0.0.5] - 2026-10-12
+
 ### Changed
 
 - Requires essence 0.18. A flow's state is read and written on the webhook's
