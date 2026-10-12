@@ -7,6 +7,8 @@ convention that a 0.x minor may carry breaking changes until the package's API s
 
 ## [Unreleased]
 
+## [0.0.4] - 2026-10-12
+
 Requires essence 0.17, which replaces power levels with named permissions.
 
 ### Changed
