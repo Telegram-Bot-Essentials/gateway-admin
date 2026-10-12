@@ -17,6 +17,8 @@ class TbeGatewayAdminServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         $this->loadTranslationsFrom(__DIR__.'/../lang', 'tbe-gateway-admin');
 
+        permissionRegistry()->register('gateway-admin.payments.manage', fn () => __('tbe-gateway-admin::permissions.payments'), 'gateway-admin');
+
         callbackQueryBus()->addCallbackQueries([
             AdminPaymentQuery::class,
         ]);
@@ -40,7 +42,7 @@ class TbeGatewayAdminServiceProvider extends ServiceProvider
             key: 'admin',
             label: __('tbe-gateway-admin::invoice.labels.gateway'),
             inlineButtonGenerator: function (Invoice $invoice) {
-                if (! hasAccess()) {
+                if (! hasAccess('gateway-admin.payments.manage')) {
                     return null;
                 }
 
