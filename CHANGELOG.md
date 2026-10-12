@@ -7,6 +7,12 @@ convention that a 0.x minor may carry breaking changes until the package's API s
 
 ## [Unreleased]
 
+### Changed
+
+- Requires essence 0.18. A flow's state is read and written on the webhook's
+  conversation (`wHook()->conversation()`) instead of the user, so it stays
+  in the chat it started in.
+
 ## [0.0.4] - 2026-10-12
 
 Requires essence 0.17, which replaces power levels with named permissions.
