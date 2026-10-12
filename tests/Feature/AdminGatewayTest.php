@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use Illuminate\Http\Client\Request;
 use TelegramBotEssentials\Billing\Models\Invoice;
-use TelegramBotEssentials\Essence\Enums\Roles;
 use TelegramBotEssentials\Essence\Models\Bot;
 use TelegramBotEssentials\Essence\Models\BotUser;
 use TelegramBotEssentials\Essence\Support\WebhookContext;
@@ -45,7 +44,7 @@ function pressPay(Bot $bot, Invoice $invoice, int $peerId): void
 it('offers the pay button to an admin', function () {
     $bot = $this->makeBot();
     $invoice = pendingInvoice($bot);
-    viewAs($this->makeBotUser($bot, 1001, ['power' => Roles::ADMIN->value]));
+    viewAs($this->grant($this->makeBotUser($bot, 1001), 'gateway-admin.payments.manage'));
 
     expect(adminButton($invoice)['callback_data'])->toBe(encodeCallback('ADMIN_PAYMENT', 'pay', [$invoice->id]));
 });
@@ -69,7 +68,7 @@ it('hides the pay button from a member', function () {
 it('pays the invoice in one click and records which admin paid it', function () {
     $bot = $this->makeBot();
     $invoice = pendingInvoice($bot);
-    $admin = $this->makeBotUser($bot, 1004, ['power' => Roles::ADMIN->value]);
+    $admin = $this->grant($this->makeBotUser($bot, 1004), 'gateway-admin.payments.manage');
 
     pressPay($bot, $invoice, 1004);
 
@@ -107,7 +106,7 @@ it('refuses a member who replays the callback', function () {
 it('does not pay an invoice twice', function () {
     $bot = $this->makeBot();
     $invoice = pendingInvoice($bot);
-    $this->makeBotUser($bot, 1006, ['power' => Roles::ADMIN->value]);
+    $this->grant($this->makeBotUser($bot, 1006), 'gateway-admin.payments.manage');
 
     pressPay($bot, $invoice, 1006);
     pressPay($bot, $invoice, 1006);
