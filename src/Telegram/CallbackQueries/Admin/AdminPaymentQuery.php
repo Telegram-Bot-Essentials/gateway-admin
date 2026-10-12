@@ -5,7 +5,6 @@ namespace TelegramBotEssentials\GatewayAdmin\Telegram\CallbackQueries\Admin;
 use Illuminate\Support\Facades\DB;
 use Telegram\Bot\Exceptions\TelegramSDKException;
 use TelegramBotEssentials\Billing\Models\Invoice;
-use TelegramBotEssentials\Essence\Enums\Roles;
 use TelegramBotEssentials\Essence\Models\MessageMeta;
 use TelegramBotEssentials\Essence\Telegram\CallbackQueries\CallbackQuery;
 use TelegramBotEssentials\GatewayAdmin\Models\AdminPaymentAttempt;
@@ -16,7 +15,7 @@ class AdminPaymentQuery extends CallbackQuery
 
     protected string $type = self::TYPE;
 
-    protected int $perm = Roles::ADMIN->value;
+    protected ?string $permission = 'gateway-admin.payments.manage';
 
     /**
      * @throws TelegramSDKException
